@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>中興仁里民宿 | 房況管理</title>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{
+margin:0;
+font-family:"Segoe UI",Arial;
+background:#f3f1ec;
+}
+
+.header{
+background:white;
+padding:25px 40px;
+font-size:40px;
+font-weight:700;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+padding:30px;
+}
+
+.card{
+background:white;
+border-radius:18px;
+padding:25px;
+margin-bottom:30px;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.room-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:30px;
+}
+
+.room-btn{
+font-size:50px;
+padding:30px;
+border:none;
+border-radius:30px;
+color:white;
+cursor:pointer;
+}
+
+.r201{background:#3A7BD5;}
+.r202{background:#00B894;}
+.r301{background:#F39C12;}
+.r302{background:#8E44AD;}
+
+.add-booking-btn{
+background:linear-gradient(135deg,#667eea,#be91eb);
+color:white;
+font-size:26px;
+padding:14px 26px;
+border:none;
+border-radius:18px;
+cursor:pointer;
+}
+
+table{ border-collapse:collapse; width:100%; }
+th{ background:#c3c0c0; }
+th,td{ padding:10px; border:1px solid #fbdede; }
+
+.form-popup{
+position:fixed;
+top:80px;
+left:80px;
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 15px 40px rgba(0,0,0,0.25);
+display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🏡 中興仁里民宿 房況管理系統</div>
+
+<div class="container">
+
+<div class="card">
+<h2>📅 今日快速查看</h2>
+
+<div class="room-grid">
+<button class="room-btn r201" onclick="selectRoom('201')">201</button>
+<button class="room-btn r202" onclick="selectRoom('202')">202</button>
+<button class="room-btn r301" onclick="selectRoom('301')">301</button>
+<button class="room-btn r302" onclick="selectRoom('302')">302</button>
+</div>
+
+<br>
+<button class="add-booking-btn" onclick="openBookingForm()">➕ 新增訂單</button>
+</div>
+
+<div class="card">
+<h2>📋 訂單列表</h2>
+
+<table>
+<thead>
+<tr>
+<th>房間</th>
+<th>姓名</th>
+<th>電話</th>
+<th>入住</th>
+<th>退房</th>
+<th>備註</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody id="bookingTableBody"></tbody>
+</table>
+
+<div id="calendar"></div>
+</div>
+</div>
+
+<div id="bookingForm" class="form-popup">
+
+<h3>新增訂單</h3>
+
+<input type="hidden" id="editId">
+
+房間：
+<select id="room">
+<option>201</option>
+<option>202</option>
+<option>301</option>
+<option>302</option>
+</select>
+
+<br><br>
+姓名：<br><input id="guest"><br><br>
+電話：<br><input id="phone"><br><br>
+入住：<br><input id="checkin" type="date"><br><br>
+退房：<br><input id="checkout" type="date"><br><br>
+備註：<br><input id="note"><br><br>
+
+<button onclick="saveBooking()">儲存</button>
+<button onclick="closeForm()">關閉</button>
+
+</div>
+
+<script>
+
+const supabaseClient = window.supabase.createClient(
+"https://bibliidwczaxrxuiagjx.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpYmxpaWR3Y3pheHJ4dWlhZ2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzM3OTEsImV4cCI6MjA4NjE0OTc5MX0.j68sBe6nWcd0txkk00ReYfca6qf9VC88mVkfSxOlKx4"
+);
+
+let currentRoom="201";
+let calendar;
+
+const roomColors={
+"201":"#3A7BD5",
+"202":"#00B894",
+"301":"#F39C12",
+"302":"#8E44AD"
+};
+
+/* ⭐ 載入訂單 */
+async function loadBookings(room){
+
+let { data } = await supabaseClient
+.from("bookings")
+.select("*")
+.eq("room",room)
+.order("check_in");
+
+let tbody=document.getElementById("bookingTableBody");
+tbody.innerHTML="";
+
+data.forEach(b=>{
+
+let bgColor="white";
+
+/* ⭐ 只有 manual 才黃色 */
+if(b.source==="manual"){
+bgColor="#fff3a0";
+}
+
+tbody.innerHTML+=`
+<tr style="background:${bgColor}">
+<td>${b.room}</td>
+<td>${b.guest_name}</td>
+<td>${b.phone||""}</td>
+<td>${b.check_in}</td>
+<td>${b.check_out}</td>
+<td>${b.note||""}</td>
+<td>
+<button onclick='editBooking(${JSON.stringify(b)})'>修改</button>
+<button onclick="deleteBooking(${b.id})">刪除</button>
+</td>
+</tr>`;
+});
+}
+
+function selectRoom(r){
+currentRoom=r;
+loadBookings(r);
+}
+
+/* ⭐ 日曆 */
+function initCalendar(){
+
+calendar=new FullCalendar.Calendar(document.getElementById("calendar"),{
+initialView:"dayGridMonth",
+height:650,
+
+events: async function(fetchInfo,success){
+
+let { data } = await supabaseClient
+.from("bookings")
+.select("*");
+
+let events=data.map(e=>({
+title:e.room+" 房 - "+e.guest_name,
+start:e.check_in,
+end:e.check_out,
+color:roomColors[e.room]
+}));
+
+success(events);
+}
+});
+
+calendar.render();
+}
+
+/* ⭐ 開新增（一定清空） */
+function openBookingForm(){
+
+bookingForm.style.display="block";
+
+/* ⭐ 強制完全重置 */
+document.getElementById("editId").value="";
+
+document.getElementById("room").value=currentRoom;
+document.getElementById("guest").value="";
+document.getElementById("phone").value="";
+document.getElementById("checkin").value="";
+document.getElementById("checkout").value="";
+document.getElementById("note").value="";
+}
+/* ⭐ 關閉也清空 */
+function closeForm(){
+
+bookingForm.style.display="none";
+
+editId.value="";
+guest.value="";
+phone.value="";
+checkin.value="";
+checkout.value="";
+note.value="";
+}
+
+/* ⭐ 儲存 */
+async function saveBooking(){
+
+let id=editId.value;
+
+if(id){
+
+// 查原 source
+let { data: old } = await supabaseClient
+.from("bookings")
+.select("source")
+.eq("id",id)
+.single();
+
+let payload={
+room:room.value,
+guest_name:guest.value,
+phone:phone.value,
+check_in:checkin.value,
+check_out:checkout.value,
+note:note.value,
+
+// ⭐ 關鍵：永遠保留原來源
+source: old?.source || "booking"
+};
+
+await supabaseClient
+.from("bookings")
+.update(payload)
+.eq("id",id);
+
+}else{
+
+let payload={
+room:room.value,
+guest_name:guest.value,
+phone:phone.value,
+check_in:checkin.value,
+check_out:checkout.value,
+note:note.value,
+source:"manual"
+};
+
+await supabaseClient
+.from("bookings")
+.insert(payload);
+}
+
+closeForm();
+loadBookings(currentRoom);
+calendar.refetchEvents();
+}
+
+/* ⭐ 編輯 */
+function editBooking(b){
+
+bookingForm.style.display="block";
+
+/* ⭐ 直接填資料 */
+editId.value=b.id;
+room.value=b.room;
+guest.value=b.guest_name || "";
+phone.value=b.phone || "";
+checkin.value=b.check_in || "";
+checkout.value=b.check_out || "";
+note.value=b.note || "";
+}
+
+/* ⭐ 刪除 */
+async function deleteBooking(id){
+if(!confirm("確定刪除?")) return;
+await supabaseClient.from("bookings").delete().eq("id",id);
+loadBookings(currentRoom);
+calendar.refetchEvents();
+}
+
+initCalendar();
+selectRoom("201");
+
+</script>
+
+</body>
+</html>
