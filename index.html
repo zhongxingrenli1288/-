@@ -53,11 +53,51 @@
         background: white; padding: 30px; border-radius: 18px; 
         box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px;
     }
-    .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
+    .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
     .form-btns { display: flex; gap: 10px; margin-top: 20px; }
-    .form-btns button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 20px; font-weight: bold; }
+    .form-btns button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 25px; font-weight: bold; }
     .btn-save { background: #00B894; color: white; }
     .btn-close { background: #eee; }
+
+    /* --- 日曆字體與邊框調整 --- */
+
+/* 1. 調整日曆整體的字體大小 */
+.fc {
+    font-size: 1.3rem; /* 讓日曆文字變大一點 (原預設約 0.8-0.9) */
+}
+
+/* 2. 加粗日曆的格線與邊框 */
+.fc td, .fc th {
+    border: 1px solid #bbb !important; /* 加深格線顏色為深灰色，並增厚至 1.5px */
+}
+
+/* 3. 調整日期數字的大小與顏色 */
+.fc .fc-daygrid-day-number {
+    font-size: 1.3rem; 
+    font-weight: 600;
+    color: #444;
+    padding: 8px;
+}
+
+/* 4. 調整房況條（Event）的字體大小 */
+.fc-event-title {
+    font-size: 1.1rem !important;
+    font-weight: 450;
+    color: #f9f9f9;
+    padding: 2px 2px;
+}
+
+/* 5. 讓當天的格子背景色更明顯 */
+.fc .fc-day-today {
+    background-color: #fff9c4 !important; /* 淡黃色標示今天 */
+}
+
+/* 6. 讓星期標題（週一、週二...）更醒目 */
+.fc .fc-col-header-cell {
+    background-color: #f8f9fa;
+    padding: 10px 0;
+    font-size: 1.3rem; 
+}
 </style>
 </head>
 
@@ -166,19 +206,27 @@ function selectRoom(r) {
     loadBookings(r);
 }
 
-/* ⭐ 初始化日曆 */
+/* ⭐ 初始化日曆 - 排序優化版 */
 function initCalendar() {
+    // 定義房間顯示的優先順序
+    const roomOrder = { "201": 1, "202": 2, "301": 3, "302": 4, "木間仁風": 5 };
+
     calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         initialView: "dayGridMonth",
         locale: 'zh-tw',
-        height: 600,
+        height: 'auto',
+        // 設定排序規則：依照我們自定義的 order 欄位排序
+        eventOrder: "order", 
         events: async function(fetchInfo, success) {
             let { data } = await supabaseClient.from("bookings").select("*");
+            
             success(data.map(e => ({
                 title: `${e.room}: ${e.guest_name}`,
                 start: e.check_in,
                 end: e.check_out,
-                color: roomColors[e.room] || "#999"
+                color: roomColors[e.room] || "#999",
+                // ⭐ 核心：賦予排序權重，讓 201 永遠排在最上面
+                order: roomOrder[e.room] || 99 
             })));
         }
     });
