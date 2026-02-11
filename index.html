@@ -98,6 +98,14 @@
     padding: 10px 0;
     font-size: 1.3rem; 
 }
+
+/* 付款狀態背景顏色 */
+.status-paid { background-color: white !important; color: #333; }
+.status-deposit { background-color: #fff176 !important; color: #333; font-weight: bold; } /* 黃色 */
+.status-none { background-color: #ff8a80 !important; color: white; font-weight: bold; } /* 紅色 */
+
+/* 讓表格顯示更清晰 */
+th, td { border: 1.5px solid #bbb !important; text-align: center; }
 </style>
 </head>
 
@@ -123,7 +131,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>姓名</th><th>電話</th><th>入住</th><th>退房</th><th>備註</th><th>操作</th>
+                    <th>姓名</th><th>電話</th><th>入住</th><th>退房</th><th>金額</th><th>付款狀態</th><th>備註</th><th>操作</th>
                 </tr>
             </thead>
             <tbody id="bookingTableBody"></tbody>
@@ -149,7 +157,15 @@
     電話：<input id="phone" placeholder="電話號碼">
     入住：<input id="checkin" type="date">
     退房：<input id="checkout" type="date">
+    金額：<input id="amount" type="number" placeholder="手動輸入金額">
+    付款狀態：
+    <select id="payment_status">
+        <option value="已付清">已付清 (白色)</option>
+        <option value="只付訂金">只付訂金 (黃色)</option>
+        <option value="還沒繳錢" selected>還沒繳錢 (紅色)</option>
+    </select>
     備註：<input id="note" placeholder="例如：加床、早餐...">
+
 
     <div class="form-btns">
         <button class="btn-save" onclick="saveBooking()">儲存</button>
@@ -182,23 +198,29 @@ async function loadBookings(room) {
     tbody.innerHTML = "";
 
     data.forEach(b => {
-        let rowClass = "";
-        if (b.source === "manual") rowClass = "row-manual";
-        else if (b.source === "booking") rowClass = "row-booking";
+    let rowClass = (b.source === "manual") ? "row-manual" : "row-booking";
+    
+    // 付款狀態樣式判定
+    let statusClass = "";
+    if (b.payment_status === "已付清") statusClass = "status-paid";
+    else if (b.payment_status === "只付訂金") statusClass = "status-deposit";
+    else if (b.payment_status === "還沒繳錢") statusClass = "status-none";
 
-        tbody.innerHTML += `
-            <tr class="${rowClass}">
-                <td>${b.guest_name}</td>
-                <td>${b.phone || ""}</td>
-                <td>${b.check_in}</td>
-                <td>${b.check_out}</td>
-                <td>${b.note || ""}</td>
-                <td>
-                    <button onclick='editBooking(${JSON.stringify(b)})'>修改</button>
-                    <button onclick="deleteBooking(${b.id})">刪除</button>
-                </td>
-            </tr>`;
-    });
+    tbody.innerHTML += `
+        <tr class="${rowClass}">
+            <td>${b.guest_name}</td>
+            <td>${b.phone || ""}</td>
+            <td>${formatChineseDate(b.check_in)}</td>
+            <td>${formatChineseDate(b.check_out)}</td>
+            <td>${b.note || ""}</td>
+            <td>${b.amount ? '$' + b.amount : ""}</td>
+            <td class="${statusClass}">${b.payment_status || ""}</td>
+            <td>
+                <button class="btn-edit" onclick='editBooking(${JSON.stringify(b)})'>修改</button>
+                <button class="btn-delete" onclick="deleteBooking(${b.id})">刪除</button>
+            </td>
+        </tr>`;
+});
 }
 
 function selectRoom(r) {
@@ -262,7 +284,10 @@ async function saveBooking() {
         phone: document.getElementById("phone").value,
         check_in: document.getElementById("checkin").value,
         check_out: document.getElementById("checkout").value,
+        amount: document.getElementById("amount").value,
+        payment_status: document.getElementById("payment_status").value,
         note: document.getElementById("note").value
+
     };
 
     if (id) {
@@ -287,6 +312,8 @@ function editBooking(b) {
     document.getElementById("phone").value = b.phone || "";
     document.getElementById("checkin").value = b.check_in;
     document.getElementById("checkout").value = b.check_out;
+    document.getElementById("amount").value = b.amount || "";
+    document.getElementById("payment_status").value = b.payment_status || "還沒繳錢";
     document.getElementById("note").value = b.note || "";
     
     document.getElementById("bookingForm").style.display = "block";
