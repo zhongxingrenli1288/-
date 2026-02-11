@@ -35,7 +35,7 @@
     /* 「改」按鈕樣式 */
     .btn-edit { 
         background-color: #4A90E2; color: white; border: none; 
-        padding: 12px 20px; border-radius: px; font-size: 20px; 
+        padding: 12px 20px; border-radius: 8px; font-size: 20px; 
         cursor: pointer; margin-right: 8px; font-weight: bold;
     }
     /* 「刪」按鈕樣式 */
@@ -52,6 +52,7 @@
         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background: white; padding: 30px; border-radius: 18px; 
         box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px;
+        max-height: 90vh; overflow-y: auto;
     }
     .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
     .form-btns { display: flex; gap: 10px; margin-top: 20px; }
@@ -188,6 +189,13 @@ const roomColors = {
     "302": "#8E44AD",
     "木間仁風": "#d66baf" // 日曆上的顏色
 };
+/* ⭐ 日期格式化工具：將 2026-02-11 轉為 2月11日 */
+function formatChineseDate(dateStr) {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+    return `${parseInt(parts[1])}月${parseInt(parts[2])}日`;
+}
 
 /* ⭐ 載入列表 */
 async function loadBookings(room) {
@@ -212,9 +220,9 @@ async function loadBookings(room) {
             <td>${b.phone || ""}</td>
             <td>${formatChineseDate(b.check_in)}</td>
             <td>${formatChineseDate(b.check_out)}</td>
-            <td>${b.note || ""}</td>
             <td>${b.amount ? '$' + b.amount : ""}</td>
             <td class="${statusClass}">${b.payment_status || ""}</td>
+            <td>${b.note || ""}</td>
             <td>
                 <button class="btn-edit" onclick='editBooking(${JSON.stringify(b)})'>修改</button>
                 <button class="btn-delete" onclick="deleteBooking(${b.id})">刪除</button>
