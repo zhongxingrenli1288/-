@@ -101,9 +101,9 @@
 }
 
 /* 付款狀態背景顏色 */
-.status-paid { background-color: white !important; color: #333; }
-.status-deposit { background-color: #fff176 !important; color: #333; font-weight: bold; } /* 黃色 */
-.status-none { background-color: #ff8a80 !important; color: white; font-weight: bold; } /* 紅色 */
+
+.status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; } /* 黃色 */
+.status-none { background-color: #da4c3f !important; color: rgb(5, 5, 5); font-weight: bold; } /* 紅色 */
 
 /* 讓表格顯示更清晰 */
 th, td { border: 1.5px solid #bbb !important; text-align: center; }
@@ -161,9 +161,9 @@ th, td { border: 1.5px solid #bbb !important; text-align: center; }
     金額：<input id="amount" type="number" placeholder="手動輸入金額">
     付款狀態：
     <select id="payment_status">
-        <option value="已付清">已付清 (白色)</option>
-        <option value="只付訂金">只付訂金 (黃色)</option>
-        <option value="還沒繳錢" selected>還沒繳錢 (紅色)</option>
+        <option value="已付清">已付清</option>
+        <option value="只付訂金">只付訂金</option>
+        <option value="還沒繳錢" selected>還沒繳錢</option>
     </select>
     備註：<input id="note" placeholder="例如：加床、早餐...">
 
@@ -272,6 +272,8 @@ function openBookingForm() {
     document.getElementById("phone").value = "";
     document.getElementById("checkin").value = "";
     document.getElementById("checkout").value = "";
+    document.getElementById("amount").value = ""; 
+    document.getElementById("payment_status").value = "";
     document.getElementById("note").value = "";
     
     document.getElementById("bookingForm").style.display = "block";
@@ -286,30 +288,38 @@ function closeForm() {
 /* ⭐ 儲存邏輯 */
 async function saveBooking() {
     const id = document.getElementById("editId").value;
+    const amountVal = document.getElementById("amount").value;
     const payload = {
         room: document.getElementById("room").value,
         guest_name: document.getElementById("guest").value,
         phone: document.getElementById("phone").value,
         check_in: document.getElementById("checkin").value,
         check_out: document.getElementById("checkout").value,
-        amount: document.getElementById("amount").value,
+        amount: amountVal === "" ? null : amountVal,
         payment_status: document.getElementById("payment_status").value,
         note: document.getElementById("note").value
 
     };
 
-    if (id) {
-        const { data: old } = await supabaseClient.from("bookings").select("source").eq("id", id).single();
-        payload.source = old?.source || "manual";
-        await supabaseClient.from("bookings").update(payload).eq("id", id);
-    } else {
-        payload.source = "manual";
-        await supabaseClient.from("bookings").insert(payload);
+    try {
+        if (id) {
+            const { data: old } = await supabaseClient.from("bookings").select("source").eq("id", id).single();
+            payload.source = old?.source || "manual";
+            const { error } = await supabaseClient.from("bookings").update(payload).eq("id", id);
+            if (error) throw error;
+        } else {
+            payload.source = "manual";
+            const { error } = await supabaseClient.from("bookings").insert(payload);
+            if (error) throw error;
+        }
+        
+        closeForm();
+        loadBookings(currentRoom);
+        if(calendar) calendar.refetchEvents();
+    } catch (err) {
+        console.error("儲存出錯:", err);
+        alert("儲存失敗，請檢查資料庫欄位或網路連線！");
     }
-
-    closeForm();
-    loadBookings(currentRoom);
-    calendar.refetchEvents();
 }
 
 function editBooking(b) {
