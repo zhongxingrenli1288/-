@@ -9,45 +9,56 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        body { margin: 0; font-family: "Segoe UI", Arial; background: #f3f1ec; color: #333; }
-        .header { background: white; padding: 25px 40px; font-size: 32px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .container { max-width: 1400px; margin: auto; padding: 30px; }
-        .card { background: white; border-radius: 18px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+    body { margin: 0; font-family: "Segoe UI", Arial; background: #f3f1ec; color: #333; }
+    .header { background: white; padding: 25px 40px; font-size: 40px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .container { max-width: 1400px; margin: auto; padding: 30px; }
+    .card { background: white; border-radius: 18px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
 
-        /* 房間按鈕 - 修改為 5 欄以容納新房間 */
-        .room-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
-        .room-btn { font-size: 40px; padding: 20px 10px; border: none; border-radius: 20px; color: white; cursor: pointer; transition: 0.2s; font-weight: bold; }
-        .room-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
-        
-        /* 房間顏色定義 */
-        .r201 { background: #3A7BD5; } 
-        .r202 { background: #00B894; }
-        .r301 { background: #F39C12; } 
-        .r302 { background: #8E44AD; }
-        .rWood { background: #d66baf; } /* 木間仁風專用色 */
+    /* 房間按鈕 */
+    .room-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+    .room-btn { font-size: 40px; padding: 20px 10px; border: none; border-radius: 20px; color: white; cursor: pointer; transition: 0.2s; font-weight: bold; }
+    .room-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+    
+    .r201 { background: #3A7BD5; } .r202 { background: #00B894; }
+    .r301 { background: #F39C12; } .r302 { background: #8E44AD; }
+    .rWood { background: #d66baf; }
 
-        .add-booking-btn { background: linear-gradient(135deg, #667eea, #be91eb); color: white; font-size: 20px; padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px; }
+    .add-booking-btn { background: linear-gradient(135deg, #667eea, #be91eb); color: white; font-size: 24px; padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px; width: 100%; }
 
-        /* 表格樣式 */
-        table { border-collapse: collapse; width: 100%; margin-top: 15px; }
-        th { background: #efefef; text-align: left; padding: 12px; }
-        td { padding: 12px; border: 1px solid #eee; }
-        .row-manual { background: #fff3a0; } 
-        .row-booking { background: #e3f2fd; }
+    /* ⭐ 表格與操作按鈕加大 */
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 25px; }
+    th { background: #efefef; text-align: left; padding: 15px; }
+    td { padding: 15px; border: 3px solid #eee; vertical-align: middle; }
+    .row-manual { background: #fff3a0; } 
+    .row-booking { background: #ffffff; }
 
-        /* 彈窗樣式 */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
-        .form-popup {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 30px; border-radius: 18px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 400px;
-        }
-        .form-popup input, .form-popup select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .form-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .form-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-save { background: #00B894; color: white; }
-        .btn-close { background: #eee; }
-    </style>
+    /* 「改」按鈕樣式 */
+    .btn-edit { 
+        background-color: #4A90E2; color: white; border: none; 
+        padding: 12px 20px; border-radius: px; font-size: 20px; 
+        cursor: pointer; margin-right: 8px; font-weight: bold;
+    }
+    /* 「刪」按鈕樣式 */
+    .btn-delete { 
+        background-color: #E74C3C; color: white; border: none; 
+        padding: 12px 20px; border-radius: 8px; font-size: 20px; 
+        cursor: pointer; font-weight: bold;
+    }
+    .btn-edit:active, .btn-delete:active { transform: scale(1.5); }
+
+    /* 彈窗樣式保持不變 */
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
+    .form-popup {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: white; padding: 30px; border-radius: 18px; 
+        box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px;
+    }
+    .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
+    .form-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .form-btns button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 20px; font-weight: bold; }
+    .btn-save { background: #00B894; color: white; }
+    .btn-close { background: #eee; }
+</style>
 </head>
 
 <body>
@@ -143,8 +154,8 @@ async function loadBookings(room) {
                 <td>${b.check_out}</td>
                 <td>${b.note || ""}</td>
                 <td>
-                    <button onclick='editBooking(${JSON.stringify(b)})'>改</button>
-                    <button onclick="deleteBooking(${b.id})">刪</button>
+                    <button onclick='editBooking(${JSON.stringify(b)})'>修改</button>
+                    <button onclick="deleteBooking(${b.id})">刪除</button>
                 </td>
             </tr>`;
     });
@@ -159,6 +170,7 @@ function selectRoom(r) {
 function initCalendar() {
     calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         initialView: "dayGridMonth",
+        locale: 'zh-tw',
         height: 600,
         events: async function(fetchInfo, success) {
             let { data } = await supabaseClient.from("bookings").select("*");
