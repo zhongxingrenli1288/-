@@ -1,0 +1,25 @@
+name: Sync Booking iCal
+
+on:
+  schedule:
+    # 這行代表每 5 分鐘跑一次
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # 這行可以讓你手動點擊按鈕立即同步
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Run Sync Script
+        run: deno run --allow-net --allow-env index.ts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
