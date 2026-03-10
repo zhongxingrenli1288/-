@@ -25,89 +25,48 @@
 
     .add-booking-btn { background: linear-gradient(135deg, #667eea, #be91eb); color: white; font-size: 24px; padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px; width: 100%; }
 
-    /* ⭐ 表格與操作按鈕加大 */
-    table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 25px; }
+    /* 表格樣式 */
+    table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 20px; }
     th { background: #efefef; text-align: left; padding: 15px; }
     td { padding: 15px; border: 3px solid #eee; vertical-align: middle; }
     .row-manual { background: #fff3a0; } 
     .row-booking { background: #ffffff; }
 
-    /* 「改」按鈕樣式 */
-    .btn-edit { 
-        background-color: #4A90E2; color: white; border: none; 
-        padding: 12px 20px; border-radius: 8px; font-size: 20px; 
-        cursor: pointer; margin-right: 8px; font-weight: bold;
+    /* ✨ 新增：點擊跳轉後的高亮閃爍效果 */
+    @keyframes highlight-fade {
+        from { background-color: #fff9c4; transform: scale(1.01); }
+        to { background-color: inherit; transform: scale(1); }
     }
-    /* 「刪」按鈕樣式 */
-    .btn-delete { 
-        background-color: #E74C3C; color: white; border: none; 
-        padding: 12px 20px; border-radius: 8px; font-size: 20px; 
-        cursor: pointer; font-weight: bold;
+    .jump-highlight {
+        animation: highlight-fade 2s ease-out;
+        border: 3px solid #f3bf12 !important;
     }
+
+    .btn-edit { background-color: #4A90E2; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; font-weight: bold; }
+    .btn-delete { background-color: #E74C3C; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
     .btn-edit:active, .btn-delete:active { transform: scale(1.5); }
 
-    /* 彈窗樣式保持不變 */
+    /* 彈窗樣式 */
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
-    .form-popup {
-        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        background: white; padding: 30px; border-radius: 18px; 
-        box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px;
-        max-height: 90vh; overflow-y: auto;
-    }
+    .form-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 18px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
     .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
     .form-btns { display: flex; gap: 10px; margin-top: 20px; }
     .form-btns button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 25px; font-weight: bold; }
     .btn-save { background: #00B894; color: white; }
     .btn-close { background: #eee; }
 
-    /* --- 日曆字體與邊框調整 --- */
+    /* 日曆樣式調整 */
+    .fc { font-size: 1.3rem; }
+    .fc td, .fc th { border: 1px solid #bbb !important; }
+    .fc .fc-daygrid-day-number { font-size: 1.3rem; font-weight: 600; color: #444; padding: 8px; }
+    .fc-event-title { font-size: 1.1rem !important; font-weight: 450; color: #f9f9f9; padding: 2px 2px; cursor: pointer; }
+    .fc .fc-day-today { background-color: #fff9c4 !important; }
+    .fc .fc-col-header-cell { background-color: #f8f9fa; padding: 10px 0; font-size: 1.3rem; }
 
-/* 1. 調整日曆整體的字體大小 */
-.fc {
-    font-size: 1.3rem; /* 讓日曆文字變大一點 (原預設約 0.8-0.9) */
-}
-
-/* 2. 加粗日曆的格線與邊框 */
-.fc td, .fc th {
-    border: 1px solid #bbb !important; /* 加深格線顏色為深灰色，並增厚至 1.5px */
-}
-
-/* 3. 調整日期數字的大小與顏色 */
-.fc .fc-daygrid-day-number {
-    font-size: 1.3rem; 
-    font-weight: 600;
-    color: #444;
-    padding: 8px;
-}
-
-/* 4. 調整房況條（Event）的字體大小 */
-.fc-event-title {
-    font-size: 1.1rem !important;
-    font-weight: 450;
-    color: #f9f9f9;
-    padding: 2px 2px;
-}
-
-/* 5. 讓當天的格子背景色更明顯 */
-.fc .fc-day-today {
-    background-color: #fff9c4 !important; /* 淡黃色標示今天 */
-}
-
-/* 6. 讓星期標題（週一、週二...）更醒目 */
-.fc .fc-col-header-cell {
-    background-color: #f8f9fa;
-    padding: 10px 0;
-    font-size: 1.3rem; 
-}
-
-/* 付款狀態背景顏色 */
-
-.status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; } /* 黃色 */
-.status-none { background-color: #da4c3f !important; color: rgb(5, 5, 5); font-weight: bold; } /* 紅色 */
-
-/* 讓表格顯示更清晰 */
-th, td { border: 1.5px solid #bbb !important; text-align: center; }
-</style>
+    .status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; }
+    .status-none { background-color: #da4c3f !important; color: white; font-weight: bold; }
+    th, td { border: 1.5px solid #bbb !important; text-align: center; }
+    </style>
 </head>
 
 <body>
@@ -127,7 +86,7 @@ th, td { border: 1.5px solid #bbb !important; text-align: center; }
         <button class="add-booking-btn" onclick="openBookingForm()">➕ 新增訂單</button>
     </div>
 
-    <div class="card">
+    <div class="card" id="listCard">
         <h2>📋 <span id="currentRoomDisplay">201</span> 房訂單列表</h2>
         <table>
             <thead>
@@ -145,15 +104,10 @@ th, td { border: 1.5px solid #bbb !important; text-align: center; }
 <div id="bookingForm" class="form-popup">
     <h3 id="formTitle">新增訂單</h3>
     <input type="hidden" id="editId">
-    
     房號：
     <select id="room">
-        <option>201</option>
-        <option>202</option>
-        <option>301</option>
-        <option>302</option>
-        <option>木間仁風</option> </select>
-    
+        <option>201</option><option>202</option><option>301</option><option>302</option><option>木間仁風</option>
+    </select>
     姓名：<input id="guest" placeholder="旅客姓名">
     電話：<input id="phone" placeholder="電話號碼">
     入住：<input id="checkin" type="date">
@@ -166,8 +120,6 @@ th, td { border: 1.5px solid #bbb !important; text-align: center; }
         <option value="還沒繳錢" selected>還沒繳錢</option>
     </select>
     備註：<input id="note" placeholder="例如：加床、早餐...">
-
-
     <div class="form-btns">
         <button class="btn-save" onclick="saveBooking()">儲存</button>
         <button class="btn-close" onclick="closeForm()">關閉</button>
@@ -182,53 +134,39 @@ const supabaseClient = window.supabase.createClient(
 
 let currentRoom = "201";
 let calendar;
-const roomColors = { 
-    "201": "#3A7BD5", 
-    "202": "#00B894", 
-    "301": "#f3bf12", 
-    "302": "#8E44AD",
-    "木間仁風": "#9a5404" // 日曆上的顏色
-};
-/* ⭐ 日期格式化工具：將 2026-02-11 轉為 2月11日 */
+const roomColors = { "201": "#3A7BD5", "202": "#00B894", "301": "#f3bf12", "302": "#8E44AD", "木間仁風": "#9a5404" };
+
 function formatChineseDate(dateStr) {
     if (!dateStr) return "";
     const parts = dateStr.split("-");
-    if (parts.length !== 3) return dateStr;
-    return `${parseInt(parts[1])}月${parseInt(parts[2])}日`;
+    return parts.length !== 3 ? dateStr : `${parseInt(parts[1])}月${parseInt(parts[2])}日`;
 }
 
-/* ⭐ 載入列表 */
 async function loadBookings(room) {
     document.getElementById("currentRoomDisplay").innerText = room;
     let { data } = await supabaseClient.from("bookings").select("*").eq("room", room).order("check_in");
-
     let tbody = document.getElementById("bookingTableBody");
     tbody.innerHTML = "";
 
     data.forEach(b => {
-    let rowClass = (b.source === "manual") ? "row-manual" : "row-booking";
-    
-    // 付款狀態樣式判定
-    let statusClass = "";
-    if (b.payment_status === "已付清") statusClass = "status-paid";
-    else if (b.payment_status === "只付訂金") statusClass = "status-deposit";
-    else if (b.payment_status === "還沒繳錢") statusClass = "status-none";
+        let rowClass = (b.source === "manual") ? "row-manual" : "row-booking";
+        let statusClass = b.payment_status === "已付清" ? "status-paid" : (b.payment_status === "只付訂金" ? "status-deposit" : "status-none");
 
-    tbody.innerHTML += `
-        <tr class="${rowClass}">
-            <td>${b.guest_name}</td>
-            <td>${b.phone || ""}</td>
-            <td>${formatChineseDate(b.check_in)}</td>
-            <td>${formatChineseDate(b.check_out)}</td>
-            <td>${b.amount ? '$' + b.amount : ""}</td>
-            <td class="${statusClass}">${b.payment_status || ""}</td>
-            <td>${b.note || ""}</td>
-            <td>
-                <button class="btn-edit" onclick='editBooking(${JSON.stringify(b)})'>修改</button>
-                <button class="btn-delete" onclick="deleteBooking(${b.id})">刪除</button>
-            </td>
-        </tr>`;
-});
+        tbody.innerHTML += `
+            <tr id="order-${b.id}" class="${rowClass}">
+                <td>${b.guest_name}</td>
+                <td>${b.phone || ""}</td>
+                <td>${formatChineseDate(b.check_in)}</td>
+                <td>${formatChineseDate(b.check_out)}</td>
+                <td>${b.amount ? '$' + b.amount : ""}</td>
+                <td class="${statusClass}">${b.payment_status || ""}</td>
+                <td>${b.note || ""}</td>
+                <td>
+                    <button class="btn-edit" onclick='editBooking(${JSON.stringify(b)})'>修改</button>
+                    <button class="btn-delete" onclick="deleteBooking(${b.id})">刪除</button>
+                </td>
+            </tr>`;
+    });
 }
 
 function selectRoom(r) {
@@ -236,46 +174,57 @@ function selectRoom(r) {
     loadBookings(r);
 }
 
-/* ⭐ 初始化日曆 - 排序優化版 */
 function initCalendar() {
-    // 定義房間顯示的優先順序
     const roomOrder = { "201": 1, "202": 2, "301": 3, "302": 4, "木間仁風": 5 };
-
     calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         initialView: "dayGridMonth",
         locale: 'zh-tw',
         height: 'auto',
-        // 設定排序規則：依照我們自定義的 order 欄位排序
-        eventOrder: "order", 
+        eventOrder: "order",
         events: async function(fetchInfo, success) {
             let { data } = await supabaseClient.from("bookings").select("*");
-            
             success(data.map(e => ({
+                id: e.id, // ✨ 核心：將 ID 傳入事件中
                 title: `${e.room}: ${e.guest_name}`,
                 start: e.check_in,
                 end: e.check_out,
                 color: roomColors[e.room] || "#999",
-                // ⭐ 核心：賦予排序權重，讓 201 永遠排在最上面
-                order: roomOrder[e.room] || 99 
+                extendedProps: { room: e.room }, // 存儲房號以便跳轉
+                order: roomOrder[e.room] || 99
             })));
+        },
+        // ✨ 新增：點擊日曆橫條後的處理邏輯
+        eventClick: async function(info) {
+            const bookingId = info.event.id;
+            const targetRoom = info.event.extendedProps.room;
+
+            // 1. 如果點擊的房號不是當前顯示的房號，先切換房號列表
+            if (currentRoom !== targetRoom) {
+                await selectRoom(targetRoom);
+            }
+
+            // 2. 等待 DOM 更新後執行跳轉與高亮
+            setTimeout(() => {
+                const element = document.getElementById(`order-${bookingId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('jump-highlight');
+                    setTimeout(() => element.classList.remove('jump-highlight'), 2000);
+                }
+            }, 100);
         }
     });
     calendar.render();
 }
 
-/* ⭐ 表單控制 */
 function openBookingForm() {
     document.getElementById("formTitle").innerText = "➕ 新增訂單";
     document.getElementById("editId").value = "";
     document.getElementById("room").value = currentRoom;
-    document.getElementById("guest").value = "";
-    document.getElementById("phone").value = "";
-    document.getElementById("checkin").value = "";
-    document.getElementById("checkout").value = "";
-    document.getElementById("amount").value = ""; 
-    document.getElementById("payment_status").value = "";
+    document.getElementById("guest").value = ""; document.getElementById("phone").value = "";
+    document.getElementById("checkin").value = ""; document.getElementById("checkout").value = "";
+    document.getElementById("amount").value = ""; document.getElementById("payment_status").value = "還沒繳錢";
     document.getElementById("note").value = "";
-    
     document.getElementById("bookingForm").style.display = "block";
     document.getElementById("overlay").style.display = "block";
 }
@@ -285,7 +234,6 @@ function closeForm() {
     document.getElementById("overlay").style.display = "none";
 }
 
-/* ⭐ 儲存邏輯 */
 async function saveBooking() {
     const id = document.getElementById("editId").value;
     const amountVal = document.getElementById("amount").value;
@@ -298,28 +246,20 @@ async function saveBooking() {
         amount: amountVal === "" ? null : amountVal,
         payment_status: document.getElementById("payment_status").value,
         note: document.getElementById("note").value
-
     };
-
     try {
         if (id) {
             const { data: old } = await supabaseClient.from("bookings").select("source").eq("id", id).single();
             payload.source = old?.source || "manual";
-            const { error } = await supabaseClient.from("bookings").update(payload).eq("id", id);
-            if (error) throw error;
+            await supabaseClient.from("bookings").update(payload).eq("id", id);
         } else {
             payload.source = "manual";
-            const { error } = await supabaseClient.from("bookings").insert(payload);
-            if (error) throw error;
+            await supabaseClient.from("bookings").insert(payload);
         }
-        
         closeForm();
         loadBookings(currentRoom);
-        if(calendar) calendar.refetchEvents();
-    } catch (err) {
-        console.error("儲存出錯:", err);
-        alert("儲存失敗，請檢查資料庫欄位或網路連線！");
-    }
+        calendar.refetchEvents();
+    } catch (err) { alert("儲存失敗！"); }
 }
 
 function editBooking(b) {
@@ -333,7 +273,6 @@ function editBooking(b) {
     document.getElementById("amount").value = b.amount || "";
     document.getElementById("payment_status").value = b.payment_status || "還沒繳錢";
     document.getElementById("note").value = b.note || "";
-    
     document.getElementById("bookingForm").style.display = "block";
     document.getElementById("overlay").style.display = "block";
 }
