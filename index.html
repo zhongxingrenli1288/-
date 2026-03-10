@@ -37,10 +37,11 @@
         from { background-color: #fff9c4; transform: scale(1.01); }
         to { background-color: inherit; transform: scale(1); }
     }
-    .jump-highlight {
-        animation: highlight-fade 2s ease-out;
-        border: 3px solid #f3bf12 !important;
-    }
+    .jump-highlight { 
+    background-color: #fff3cd !important; 
+    border: 3px solid #ffc107 !important;
+    transition: background-color 0.3s;
+}
 
     .btn-edit { background-color: #4A90E2; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; font-weight: bold; }
     .btn-delete { background-color: #E74C3C; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
@@ -195,23 +196,24 @@ function initCalendar() {
         },
         // ✨ 新增：點擊日曆橫條後的處理邏輯
         eventClick: async function(info) {
-            const bookingId = info.event.id;
-            const targetRoom = info.event.extendedProps.room;
+            const bId = info.event.id;
+            const bRoom = info.event.extendedProps.room;
+            
+            // 1. 先切換房間
+            if (currentRoom !== bRoom) await selectRoom(bRoom);
 
-            // 1. 如果點擊的房號不是當前顯示的房號，先切換房號列表
-            if (currentRoom !== targetRoom) {
-                await selectRoom(targetRoom);
+            // 2. 找到對應的訂單列
+            const el = document.getElementById(`order-${bId}`);
+            if (el) {
+                // 3. 先清除之前所有的高亮（避免同時好幾行變黃色）
+                document.querySelectorAll('.jump-highlight').forEach(row => {
+                    row.classList.remove('jump-highlight');
+                });
+
+                // 4. 強制滾動並加上高亮類別 (不會自動移除)
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('jump-highlight');
             }
-
-            // 2. 等待 DOM 更新後執行跳轉與高亮
-            setTimeout(() => {
-                const element = document.getElementById(`order-${bookingId}`);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    element.classList.add('jump-highlight');
-                    setTimeout(() => element.classList.remove('jump-highlight'), 2000);
-                }
-            }, 100);
         }
     });
     calendar.render();
