@@ -38,7 +38,7 @@
         to { background-color: inherit; transform: scale(1); }
     }
     .jump-highlight { 
-    background-color: #fff3cd !important; 
+    background-color: #fff3cd !important;
     border: 3px solid #ffc107 !important;
     transition: background-color 0.3s;
 }
@@ -199,20 +199,33 @@ function initCalendar() {
             const bId = info.event.id;
             const bRoom = info.event.extendedProps.room;
             
-            // 1. 先切換房間
-            if (currentRoom !== bRoom) await selectRoom(bRoom);
+            // 1. 定義一個執行跳轉的內部小工具
+            const scrollToOrder = () => {
+                const el = document.getElementById(`order-${bId}`);
+                if (el) {
+                    // 先清除所有舊的閃爍
+                    document.querySelectorAll('.jump-highlight').forEach(row => {
+                        row.classList.remove('jump-highlight');
+                    });
+                    // 執行捲動與閃爍
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('jump-highlight');
+                }
+            };
 
-            // 2. 找到對應的訂單列
-            const el = document.getElementById(`order-${bId}`);
-            if (el) {
-                // 3. 先清除之前所有的高亮（避免同時好幾行變黃色）
-                document.querySelectorAll('.jump-highlight').forEach(row => {
-                    row.classList.remove('jump-highlight');
-                });
-
-                // 4. 強制滾動並加上高亮類別 (不會自動移除)
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.classList.add('jump-highlight');
+            // 2. 判斷是否需要換房
+            if (currentRoom !== bRoom) {
+                currentRoom = bRoom;
+                document.getElementById("currentRoomDisplay").innerText = bRoom;
+                
+                // ⭐ 關鍵：等待 loadBookings 完成（資料渲染進 DOM）後再跳轉
+                await loadBookings(bRoom); 
+                
+                // 給瀏覽器一點點時間（50-100毫秒）確認 HTML 已經畫好
+                setTimeout(scrollToOrder, 100);
+            } else {
+                // 同房間直接跳轉
+                scrollToOrder();
             }
         }
     });
