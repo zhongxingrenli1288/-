@@ -14,7 +14,6 @@
     .container { max-width: 1400px; margin: auto; padding: 30px; }
     .card { background: white; border-radius: 18px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
 
-    /* 房間按鈕 */
     .room-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
     .room-btn { font-size: 40px; padding: 20px 10px; border: none; border-radius: 20px; color: white; cursor: pointer; transition: 0.2s; font-weight: bold; }
     .room-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
@@ -23,70 +22,43 @@
     .r301 { background: #f3bf12; } .r302 { background: #8E44AD; }
     .rWood { background: #9a5404; }
 
-    /* 篩選器樣式 */
-    .filter-group { display: flex; gap: 20px; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc; }
-    .filter-group select { font-size: 30px; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
+    /* 篩選與分頁列樣式修正 */
+    .filter-group { display: flex; gap: 20px; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc; flex-wrap: wrap; }
+    .filter-group select { font-size: 24px; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
+    
+    /* 分頁按鈕樣式 */
+    .pagination-wrapper { display: flex; gap: 10px; align-items: center; margin-left: auto; font-size: 20px; font-weight: bold; }
+    .pagination-wrapper button { padding: 8px 20px; font-size: 18px; cursor: pointer; border-radius: 8px; border: 1px solid #ccc; background: white; transition: 0.2s; }
+    .pagination-wrapper button:hover:not(:disabled) { background: #eee; }
+    .pagination-wrapper button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .add-booking-btn { background: linear-gradient(135deg, #667eea, #be91eb); color: white; font-size: 24px; padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px; width: 100%; }
 
-    /* --- 表格樣式修正區 --- */
     table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 20px; }
-    
-    th { 
-        background: #efefef; 
-        text-align: center; /* 表頭文字置中 */
-        padding: 15px; 
-        border: 1.5px solid #bbb !important;
-    }
-    
-    td { 
-        padding: 15px; 
-        border: 1.5px solid #bbb !important; 
-        vertical-align: middle; 
-        text-align: center; /* 預設所有內容置中 */
-    }
+    th { background: #efefef; text-align: center; padding: 15px; border: 1.5px solid #bbb !important; }
+    td { padding: 15px; border: 1.5px solid #bbb !important; vertical-align: middle; text-align: center; }
 
     /* 針對特定欄位調整對齊方式 */
-    #bookingTableBody td:nth-child(1), /* 姓名：靠左 */
-    #bookingTableBody td:nth-child(7)  /* 備註：靠左 */ {
-        text-align: left;
-    }
-
-    #bookingTableBody td:nth-child(5) {
-    text-align: left;
-    font-weight: bold; /*變粗體*/
-    }
-    /* 日期、金額、付款狀態：強制置中 */
-    #bookingTableBody td:nth-child(3), /* 入住 */
-    #bookingTableBody td:nth-child(4), /* 退房 */
-    #bookingTableBody td:nth-child(5), /* 金額 */
-    #bookingTableBody td:nth-child(6)  /* 付款狀態 */ {
-        text-align: center;
-    }
-    /* ----------------------- */
+    #bookingTableBody td:nth-child(1), 
+    #bookingTableBody td:nth-child(7) { text-align: left; }
+    #bookingTableBody td:nth-child(1) { font-weight: bold; } /* 姓名變粗體 */
 
     .row-manual { background: #fff3a0; } 
     .row-booking { background: #ffffff; }
 
-    .jump-highlight { 
-        background-color: #fff3cd !important;
-        border: 3px solid #ffc107 !important;
-        transition: background-color 0.3s;
-    }
-
+    .jump-highlight { background-color: #fff3cd !important; border: 3px solid #ffc107 !important; transition: background-color 0.3s; }
     .btn-edit { background-color: #4A90E2; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; font-weight: bold; }
     .btn-delete { background-color: #E74C3C; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
     
-    .status-paid { background-color: #00B894 !important; color: white; font-weight: bold; text-align: center; }
-    .status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; text-align: center; }
-    .status-none { background-color: #da4c3f !important; color: white; font-weight: bold; text-align: center; }
+    .status-paid { background-color: #00B894 !important; color: white; font-weight: bold; }
+    .status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; }
+    .status-none { background-color: #da4c3f !important; color: white; font-weight: bold; }
     
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
     .form-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 18px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
     .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
     
     .fc { font-size: 1.3rem; margin-top: 30px; }
-    .fc-event-title { cursor: pointer; }
     </style>
 </head>
 
@@ -116,6 +88,8 @@
                 <option value="all">所有日期</option>
                 <option value="future">今天及未來訂單</option>
             </select>
+
+            <div id="paginationControls" class="pagination-wrapper"></div>
         </div>
 
         <button class="add-booking-btn" onclick="openBookingForm()">➕ 新增訂單</button>
@@ -139,15 +113,12 @@
 <div id="bookingForm" class="form-popup">
     <h3 id="formTitle">新增訂單</h3>
     <input type="hidden" id="editId">
-    房號：
-    <select id="room">
-        <option>201</option><option>202</option><option>301</option><option>302</option><option>木間仁風</option>
-    </select>
+    房號：<select id="room"><option>201</option><option>202</option><option>301</option><option>302</option><option>木間仁風</option></select>
     姓名：<input id="guest" placeholder="旅客姓名">
     電話：<input id="phone" placeholder="電話號碼">
     入住：<input id="checkin" type="date">
     退房：<input id="checkout" type="date">
-    金額：<input id="amount" type="number" placeholder="手動輸入金額">
+    金額：<input id="amount" type="number" placeholder="金額">
     付款狀態：
     <select id="payment_status">
         <option value="已付清">已付清</option>
@@ -170,6 +141,8 @@ const supabaseClient = window.supabase.createClient(
 let currentRoom = "201";
 let calendar;
 let currentRawData = []; 
+let currentPage = 1;
+const rowsPerPage = 10;
 const roomColors = { "201": "#3A7BD5", "202": "#00B894", "301": "#f3bf12", "302": "#8E44AD", "木間仁風": "#9a5404" };
 
 function formatChineseDate(dateStr) {
@@ -182,6 +155,7 @@ async function loadBookings(room) {
     document.getElementById("currentRoomDisplay").innerText = room;
     let { data } = await supabaseClient.from("bookings").select("*").eq("room", room).order("check_in");
     currentRawData = data || []; 
+    currentPage = 1; // 換房時重設頁數
     renderFilteredTable();
 }
 
@@ -190,23 +164,25 @@ function renderFilteredTable() {
     const dateFilter = document.getElementById("dateFilter").value;
     const today = new Date().toISOString().split('T')[0];
 
-    let tbody = document.getElementById("bookingTableBody");
-    tbody.innerHTML = "";
-
     const filtered = currentRawData.filter(b => {
-        const matchSource = (sourceFilter === "all") || 
-                           (sourceFilter === "manual" ? (b.source === "manual") : (b.source !== "manual"));
+        const matchSource = (sourceFilter === "all") || (sourceFilter === "manual" ? (b.source === "manual") : (b.source !== "manual"));
         const matchDate = (dateFilter === "all") || (b.check_in >= today);
         return matchSource && matchDate;
     });
 
-    filtered.forEach(b => {
+    const totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedData = filtered.slice(startIndex, startIndex + rowsPerPage);
+
+    let tbody = document.getElementById("bookingTableBody");
+    tbody.innerHTML = "";
+    paginatedData.forEach(b => {
         let rowClass = (b.source === "manual") ? "row-manual" : "row-booking";
         let statusClass = b.payment_status === "已付清" ? "status-paid" : (b.payment_status === "只付訂金" ? "status-deposit" : "status-none");
-
         tbody.innerHTML += `
             <tr id="order-${b.id}" class="${rowClass}">
-                <td>${b.guest_name}</td>
+                <td style="font-weight: bold;">${b.guest_name}</td>
                 <td>${b.phone || ""}</td>
                 <td>${formatChineseDate(b.check_in)}</td>
                 <td>${formatChineseDate(b.check_out)}</td>
@@ -219,6 +195,22 @@ function renderFilteredTable() {
                 </td>
             </tr>`;
     });
+
+    renderPaginationControls(totalPages);
+}
+
+function renderPaginationControls(totalPages) {
+    const controls = document.getElementById("paginationControls");
+    controls.innerHTML = `
+        <button onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>上一頁</button>
+        <span>第 ${currentPage} / ${totalPages} 頁</span>
+        <button onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>下一頁</button>
+    `;
+}
+
+function changePage(step) {
+    currentPage += step;
+    renderFilteredTable();
 }
 
 function selectRoom(r) {
@@ -227,29 +219,20 @@ function selectRoom(r) {
 }
 
 function initCalendar() {
-    const roomOrder = { "201": 1, "202": 2, "301": 3, "302": 4, "木間仁風": 5 };
     calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         initialView: "dayGridMonth",
         locale: 'zh-tw',
         height: 'auto',
         fixedWeekCount: false,
-        eventOrder: "order",
         events: async function(fetchInfo, success) {
             let { data } = await supabaseClient.from("bookings").select("*");
             success(data.map(e => ({
-                id: e.id,
-                title: `${e.room}: ${e.guest_name}`,
-                start: e.check_in,
-                end: e.check_out,
-                color: roomColors[e.room] || "#999",
-                extendedProps: { room: e.room },
-                order: roomOrder[e.room] || 99
+                id: e.id, title: `${e.room}: ${e.guest_name}`, start: e.check_in, end: e.check_out, color: roomColors[e.room] || "#999", extendedProps: { room: e.room }
             })));
         },
         eventClick: async function(info) {
             const bId = info.event.id;
             const bRoom = info.event.extendedProps.room;
-            
             const scrollToOrder = () => {
                 const el = document.getElementById(`order-${bId}`);
                 if (el) {
@@ -258,13 +241,11 @@ function initCalendar() {
                     el.classList.add('jump-highlight');
                 }
             };
-
             document.getElementById("dateFilter").value = "all";
             document.getElementById("sourceFilter").value = "all";
-
             if (currentRoom !== bRoom) {
                 currentRoom = bRoom;
-                await loadBookings(bRoom); 
+                await loadBookings(bRoom);
                 setTimeout(scrollToOrder, 150);
             } else {
                 renderFilteredTable();
@@ -290,30 +271,19 @@ function closeForm() { document.getElementById("bookingForm").style.display = "n
 
 async function saveBooking() {
     const id = document.getElementById("editId").value;
-    const amountVal = document.getElementById("amount").value;
     const payload = {
         room: document.getElementById("room").value,
         guest_name: document.getElementById("guest").value,
         phone: document.getElementById("phone").value,
         check_in: document.getElementById("checkin").value,
         check_out: document.getElementById("checkout").value,
-        amount: amountVal === "" ? null : amountVal,
+        amount: document.getElementById("amount").value || null,
         payment_status: document.getElementById("payment_status").value,
         note: document.getElementById("note").value
     };
-    try {
-        if (id) {
-            const { data: old } = await supabaseClient.from("bookings").select("source").eq("id", id).single();
-            payload.source = old?.source || "manual";
-            await supabaseClient.from("bookings").update(payload).eq("id", id);
-        } else {
-            payload.source = "manual";
-            await supabaseClient.from("bookings").insert(payload);
-        }
-        closeForm();
-        loadBookings(currentRoom);
-        calendar.refetchEvents();
-    } catch (err) { alert("儲存失敗！"); }
+    if (id) await supabaseClient.from("bookings").update(payload).eq("id", id);
+    else { payload.source = "manual"; await supabaseClient.from("bookings").insert(payload); }
+    closeForm(); loadBookings(currentRoom); calendar.refetchEvents();
 }
 
 function editBooking(b) {
@@ -332,10 +302,7 @@ function editBooking(b) {
 }
 
 async function deleteBooking(id) {
-    if (!confirm("確定刪除這筆訂單嗎？")) return;
-    await supabaseClient.from("bookings").delete().eq("id", id);
-    loadBookings(currentRoom);
-    calendar.refetchEvents();
+    if (confirm("確定刪除嗎？")) { await supabaseClient.from("bookings").delete().eq("id", id); loadBookings(currentRoom); calendar.refetchEvents(); }
 }
 
 initCalendar();
