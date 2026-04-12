@@ -23,50 +23,66 @@
     .r301 { background: #f3bf12; } .r302 { background: #8E44AD; }
     .rWood { background: #9a5404; }
 
+    /* 篩選器樣式 */
+    .filter-group { display: flex; gap: 20px; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc; }
+    .filter-group select { font-size: 30px; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
+
     .add-booking-btn { background: linear-gradient(135deg, #667eea, #be91eb); color: white; font-size: 24px; padding: 15px 30px; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px; width: 100%; }
 
-    /* 表格樣式 */
+    /* --- 表格樣式修正區 --- */
     table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 20px; }
-    th { background: #efefef; text-align: left; padding: 15px; }
-    td { padding: 15px; border: 3px solid #eee; vertical-align: middle; }
+    
+    th { 
+        background: #efefef; 
+        text-align: center; /* 表頭文字置中 */
+        padding: 15px; 
+        border: 1.5px solid #bbb !important;
+    }
+    
+    td { 
+        padding: 15px; 
+        border: 1.5px solid #bbb !important; 
+        vertical-align: middle; 
+        text-align: center; /* 預設所有內容置中 */
+    }
+
+    /* 針對特定欄位調整對齊方式 */
+    #bookingTableBody td:nth-child(1), /* 姓名：靠左 */
+    #bookingTableBody td:nth-child(7)  /* 備註：靠左 */ {
+        text-align: left;
+    }
+
+    /* 日期、金額、付款狀態：強制置中 */
+    #bookingTableBody td:nth-child(3), /* 入住 */
+    #bookingTableBody td:nth-child(4), /* 退房 */
+    #bookingTableBody td:nth-child(5), /* 金額 */
+    #bookingTableBody td:nth-child(6)  /* 付款狀態 */ {
+        text-align: center;
+    }
+    /* ----------------------- */
+
     .row-manual { background: #fff3a0; } 
     .row-booking { background: #ffffff; }
 
-    /* ✨ 新增：點擊跳轉後的高亮閃爍效果 */
-    @keyframes highlight-fade {
-        from { background-color: #fff9c4; transform: scale(1.01); }
-        to { background-color: inherit; transform: scale(1); }
-    }
     .jump-highlight { 
-    background-color: #fff3cd !important;
-    border: 3px solid #ffc107 !important;
-    transition: background-color 0.3s;
-}
+        background-color: #fff3cd !important;
+        border: 3px solid #ffc107 !important;
+        transition: background-color 0.3s;
+    }
 
     .btn-edit { background-color: #4A90E2; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; font-weight: bold; }
     .btn-delete { background-color: #E74C3C; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
-    .btn-edit:active, .btn-delete:active { transform: scale(1.5); }
-
-    /* 彈窗樣式 */
+    
+    .status-paid { background-color: #00B894 !important; color: white; font-weight: bold; text-align: center; }
+    .status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; text-align: center; }
+    .status-none { background-color: #da4c3f !important; color: white; font-weight: bold; text-align: center; }
+    
     .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
     .form-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 18px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
     .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
-    .form-btns { display: flex; gap: 10px; margin-top: 20px; }
-    .form-btns button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 25px; font-weight: bold; }
-    .btn-save { background: #00B894; color: white; }
-    .btn-close { background: #eee; }
-
-    /* 日曆樣式調整 */
-    .fc { font-size: 1.3rem; }
-    .fc td, .fc th { border: 1px solid #bbb !important; }
-    .fc .fc-daygrid-day-number { font-size: 1.3rem; font-weight: 600; color: #444; padding: 8px; }
-    .fc-event-title { font-size: 1.1rem !important; font-weight: 450; color: #f9f9f9; padding: 2px 2px; cursor: pointer; }
-    .fc .fc-day-today { background-color: #fff9c4 !important; }
-    .fc .fc-col-header-cell { background-color: #f8f9fa; padding: 10px 0; font-size: 1.3rem; }
-
-    .status-deposit { background-color: #f3f709 !important; color: #040404; font-weight: bold; }
-    .status-none { background-color: #da4c3f !important; color: white; font-weight: bold; }
-    th, td { border: 1.5px solid #bbb !important; text-align: center; }
+    
+    .fc { font-size: 1.3rem; margin-top: 30px; }
+    .fc-event-title { cursor: pointer; }
     </style>
 </head>
 
@@ -84,6 +100,20 @@
             <button class="room-btn r302" onclick="selectRoom('302')">302</button>
             <button class="room-btn rWood" onclick="selectRoom('木間仁風')">木間仁風</button>
         </div>
+
+        <div class="filter-group">
+            <span>🔍 篩選：</span>
+            <select id="sourceFilter" onchange="renderFilteredTable()">
+                <option value="all">所有來源 (全部)</option>
+                <option value="Booking同步">Booking 同步</option>
+                <option value="manual">手動輸入</option>
+            </select>
+            <select id="dateFilter" onchange="renderFilteredTable()">
+                <option value="all">所有日期</option>
+                <option value="future">今天及未來訂單</option>
+            </select>
+        </div>
+
         <button class="add-booking-btn" onclick="openBookingForm()">➕ 新增訂單</button>
     </div>
 
@@ -97,7 +127,7 @@
             </thead>
             <tbody id="bookingTableBody"></tbody>
         </table>
-        <div id="calendar" style="margin-top: 30px;"></div>
+        <div id="calendar"></div>
     </div>
 </div>
 
@@ -122,8 +152,8 @@
     </select>
     備註：<input id="note" placeholder="例如：加床、早餐...">
     <div class="form-btns">
-        <button class="btn-save" onclick="saveBooking()">儲存</button>
-        <button class="btn-close" onclick="closeForm()">關閉</button>
+        <button style="background: #33e247; color: white; padding: 15px; border-radius: 8px; border:none; cursor:pointer; font-weight:bold;" onclick="saveBooking()">儲存</button>
+        <button style="background: #eee; padding: 15px; border-radius: 8px; border:none; cursor:pointer;" onclick="closeForm()">關閉</button>
     </div>
 </div>
 
@@ -135,6 +165,7 @@ const supabaseClient = window.supabase.createClient(
 
 let currentRoom = "201";
 let calendar;
+let currentRawData = []; 
 const roomColors = { "201": "#3A7BD5", "202": "#00B894", "301": "#f3bf12", "302": "#8E44AD", "木間仁風": "#9a5404" };
 
 function formatChineseDate(dateStr) {
@@ -146,10 +177,26 @@ function formatChineseDate(dateStr) {
 async function loadBookings(room) {
     document.getElementById("currentRoomDisplay").innerText = room;
     let { data } = await supabaseClient.from("bookings").select("*").eq("room", room).order("check_in");
+    currentRawData = data || []; 
+    renderFilteredTable();
+}
+
+function renderFilteredTable() {
+    const sourceFilter = document.getElementById("sourceFilter").value;
+    const dateFilter = document.getElementById("dateFilter").value;
+    const today = new Date().toISOString().split('T')[0];
+
     let tbody = document.getElementById("bookingTableBody");
     tbody.innerHTML = "";
 
-    data.forEach(b => {
+    const filtered = currentRawData.filter(b => {
+        const matchSource = (sourceFilter === "all") || 
+                           (sourceFilter === "manual" ? (b.source === "manual") : (b.source !== "manual"));
+        const matchDate = (dateFilter === "all") || (b.check_in >= today);
+        return matchSource && matchDate;
+    });
+
+    filtered.forEach(b => {
         let rowClass = (b.source === "manual") ? "row-manual" : "row-booking";
         let statusClass = b.payment_status === "已付清" ? "status-paid" : (b.payment_status === "只付訂金" ? "status-deposit" : "status-none");
 
@@ -181,50 +228,42 @@ function initCalendar() {
         initialView: "dayGridMonth",
         locale: 'zh-tw',
         height: 'auto',
+        fixedWeekCount: false,
         eventOrder: "order",
         events: async function(fetchInfo, success) {
             let { data } = await supabaseClient.from("bookings").select("*");
             success(data.map(e => ({
-                id: e.id, // ✨ 核心：將 ID 傳入事件中
+                id: e.id,
                 title: `${e.room}: ${e.guest_name}`,
                 start: e.check_in,
                 end: e.check_out,
                 color: roomColors[e.room] || "#999",
-                extendedProps: { room: e.room }, // 存儲房號以便跳轉
+                extendedProps: { room: e.room },
                 order: roomOrder[e.room] || 99
             })));
         },
-        // ✨ 新增：點擊日曆橫條後的處理邏輯
         eventClick: async function(info) {
             const bId = info.event.id;
             const bRoom = info.event.extendedProps.room;
             
-            // 1. 定義一個執行跳轉的內部小工具
             const scrollToOrder = () => {
                 const el = document.getElementById(`order-${bId}`);
                 if (el) {
-                    // 先清除所有舊的閃爍
-                    document.querySelectorAll('.jump-highlight').forEach(row => {
-                        row.classList.remove('jump-highlight');
-                    });
-                    // 執行捲動與閃爍
+                    document.querySelectorAll('.jump-highlight').forEach(row => row.classList.remove('jump-highlight'));
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     el.classList.add('jump-highlight');
                 }
             };
 
-            // 2. 判斷是否需要換房
+            document.getElementById("dateFilter").value = "all";
+            document.getElementById("sourceFilter").value = "all";
+
             if (currentRoom !== bRoom) {
                 currentRoom = bRoom;
-                document.getElementById("currentRoomDisplay").innerText = bRoom;
-                
-                // ⭐ 關鍵：等待 loadBookings 完成（資料渲染進 DOM）後再跳轉
                 await loadBookings(bRoom); 
-                
-                // 給瀏覽器一點點時間（50-100毫秒）確認 HTML 已經畫好
-                setTimeout(scrollToOrder, 100);
+                setTimeout(scrollToOrder, 150);
             } else {
-                // 同房間直接跳轉
+                renderFilteredTable();
                 scrollToOrder();
             }
         }
@@ -243,11 +282,7 @@ function openBookingForm() {
     document.getElementById("bookingForm").style.display = "block";
     document.getElementById("overlay").style.display = "block";
 }
-
-function closeForm() {
-    document.getElementById("bookingForm").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-}
+function closeForm() { document.getElementById("bookingForm").style.display = "none"; document.getElementById("overlay").style.display = "none"; }
 
 async function saveBooking() {
     const id = document.getElementById("editId").value;
