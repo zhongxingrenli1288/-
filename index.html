@@ -21,7 +21,7 @@
     .r201 { background: #3A7BD5; } .r202 { background: #00B894; }
     .r301 { background: #f3bf12; } .r302 { background: #8E44AD; }
     .rWood { background: #9a5404; }
-    .rAll { background: #444; } /* 所有房號按鈕顏色 */
+    .rAll { background: #444; } 
 
     .filter-group { display: flex; gap: 15px; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ccc; flex-wrap: wrap; }
     .filter-group select { font-size: 20px; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
@@ -37,14 +37,15 @@
     th { background: #efefef; text-align: center; padding: 15px; border: 1.5px solid #bbb !important; }
     td { padding: 15px; border: 1.5px solid #bbb !important; vertical-align: middle; text-align: center; }
 
-    /* 房號小標籤樣式 */
     .room-tag { padding: 4px 10px; border-radius: 6px; color: white; font-weight: bold; font-size: 16px; display: inline-block; }
 
     #bookingTableBody td:nth-child(1) { text-align: left; font-weight: bold; } 
     .row-manual { background: #fff3a0; } 
     .row-booking { background: #ffffff; }
 
+    /* 跳轉高亮樣式 */
     .jump-highlight { background-color: #fff3cd !important; border: 3px solid #ffc107 !important; transition: background-color 0.3s; }
+    
     .btn-edit { background-color: #4A90E2; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-right: 8px; font-weight: bold; }
     .btn-delete { background-color: #E74C3C; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
     
@@ -56,8 +57,15 @@
     .form-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 18px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); display: none; z-index: 1000; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
     .form-popup input, .form-popup select { width: 100%; padding: 15px; margin: 10px 0; border: 3px solid #ddd; border-radius: 8px; font-size: 18px; box-sizing: border-box; }
     
-    .fc { font-size: 1.5rem; margin-top: 30px; }
-    .fc .fc-event-title { font-weight: 500; padding: 2px 5px; }
+    /* 日曆加粗樣式 */
+    .fc { font-size: 1.3rem; margin-top: 30px; }
+    .fc .fc-toolbar-title { font-weight: 800; font-size: 2rem; }
+    .fc .fc-col-header-cell-cushion { font-weight: 700; color: #333; }
+    .fc .fc-daygrid-day-number { font-weight: 700; }
+    .fc .fc-event-title { font-weight: 700; padding: 2px 5px; }
+    .fc .fc-button { font-weight: bold; }
+
+    #depositContainer { display: none; background: #fffde7; padding: 10px; border-radius: 8px; border: 1px solid #fbc02d; margin: 10px 0; }
     </style>
 </head>
 
@@ -125,13 +133,19 @@
     電話：<input id="phone" placeholder="電話號碼">
     入住：<input id="checkin" type="date">
     退房：<input id="checkout" type="date">
-    金額：<input id="amount" type="number" placeholder="金額">
+    總金額：<input id="amount" type="number" placeholder="請輸入總額">
+    
     付款狀態：
-    <select id="payment_status">
+    <select id="payment_status" onchange="toggleDepositInput()">
         <option value="已付清">已付清</option>
         <option value="只付訂金">只付訂金</option>
         <option value="還沒繳錢" selected>還沒繳錢</option>
     </select>
+
+    <div id="depositContainer">
+        訂金金額：<input id="deposit_amount" type="number" placeholder="請輸入已收訂金">
+    </div>
+
     備註：<input id="note" placeholder="例如：加床、早餐...">
     <div style="display:flex; gap:10px; margin-top:10px;">
         <button style="flex:1; background: #33e247; color: white; padding: 15px; border-radius: 8px; border:none; cursor:pointer; font-weight:bold;" onclick="saveBooking()">儲存</button>
@@ -152,6 +166,12 @@ let currentPage = 1;
 const rowsPerPage = 10;
 const roomColors = { "201": "#3A7BD5", "202": "#00B894", "301": "#f3bf12", "302": "#8E44AD", "木間仁風": "#9a5404" };
 
+function toggleDepositInput() {
+    const status = document.getElementById("payment_status").value;
+    const container = document.getElementById("depositContainer");
+    container.style.display = (status === "只付訂金") ? "block" : "none";
+}
+
 function formatChineseDate(dateStr) {
     if (!dateStr) return "";
     const parts = dateStr.split("-");
@@ -160,18 +180,10 @@ function formatChineseDate(dateStr) {
 
 async function loadBookings(room) {
     document.getElementById("currentRoomDisplay").innerText = (room === "ALL" ? "所有房號" : room);
-    
     let query = supabaseClient.from("bookings").select("*");
-    
-    // 如果不是 ALL，則篩選特定房間
-    if (room !== "ALL") {
-        query = query.eq("room", room);
-    }
-    
+    if (room !== "ALL") query = query.eq("room", room);
     let { data } = await query.order("check_in", { ascending: false });
-    
     currentRawData = data || []; 
-    currentPage = 1; 
     renderFilteredTable();
 }
 
@@ -194,13 +206,13 @@ function renderFilteredTable() {
         return matchSource && matchMonth && matchDate;
     });
 
-    // 動態生成表頭：如果是 ALL 模式則增加房號欄位
     let headerHtml = `<tr><th>姓名</th><th>電話</th>`;
     if (currentRoom === "ALL") headerHtml += `<th>房號</th>`;
     headerHtml += `<th>入住</th><th>退房</th><th>金額</th><th>付款狀態</th><th>備註</th><th>操作</th></tr>`;
     document.getElementById("tableHeader").innerHTML = headerHtml;
 
     const totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
+    if (currentPage > totalPages) currentPage = totalPages || 1;
     const startIndex = (currentPage - 1) * rowsPerPage;
     const paginatedData = filtered.slice(startIndex, startIndex + rowsPerPage);
 
@@ -211,17 +223,21 @@ function renderFilteredTable() {
         let statusClass = b.payment_status === "已付清" ? "status-paid" : (b.payment_status === "只付訂金" ? "status-deposit" : "status-none");
         let roomTag = `<span class="room-tag" style="background:${roomColors[b.room] || '#999'}">${b.room}</span>`;
 
+        let amountDisplay = b.amount ? '$' + b.amount : "";
+        let statusDisplay = b.payment_status || "";
+        if (b.payment_status === "只付訂金" && b.deposit_amount) {
+            statusDisplay += ` ($${b.deposit_amount})`;
+        }
+
         let rowHtml = `<tr id="order-${b.id}" class="${rowClass}">
             <td style="font-weight: bold;">${b.guest_name}</td>
             <td>${b.phone || ""}</td>`;
-        
         if (currentRoom === "ALL") rowHtml += `<td>${roomTag}</td>`;
-        
         rowHtml += `
             <td>${formatChineseDate(b.check_in)}</td>
             <td>${formatChineseDate(b.check_out)}</td>
-            <td style="font-weight: bold;">${b.amount ? '$' + b.amount : ""}</td>
-            <td class="${statusClass}">${b.payment_status || ""}</td>
+            <td style="font-weight: bold;">${amountDisplay}</td>
+            <td class="${statusClass}">${statusDisplay}</td>
             <td style="text-align: left;">${b.note || ""}</td>
             <td>
                 <button class="btn-edit" onclick='editBooking(${JSON.stringify(b)})'>修改</button>
@@ -230,7 +246,6 @@ function renderFilteredTable() {
         </tr>`;
         tbody.innerHTML += rowHtml;
     });
-
     renderPaginationControls(totalPages);
 }
 
@@ -245,9 +260,10 @@ function renderPaginationControls(totalPages) {
 
 function changePage(step) { currentPage += step; renderFilteredTable(); }
 
-function selectRoom(r) {
+// ✨ 重新整合跳轉功能的 selectRoom
+async function selectRoom(r) {
     currentRoom = r;
-    loadBookings(r);
+    await loadBookings(r);
 }
 
 function initCalendar() {
@@ -265,26 +281,31 @@ function initCalendar() {
         eventClick: async function(info) {
             const bId = info.event.id;
             const bRoom = info.event.extendedProps.room;
+
+            // 重設所有篩選器
+            document.getElementById("dateFilter").value = "all";
+            document.getElementById("sourceFilter").value = "all";
+            document.getElementById("monthFilter").value = "all";
+
+            // 跳轉定位函式
             const scrollToOrder = () => {
                 const el = document.getElementById(`order-${bId}`);
                 if (el) {
                     document.querySelectorAll('.jump-highlight').forEach(row => row.classList.remove('jump-highlight'));
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     el.classList.add('jump-highlight');
+                } else {
+                    alert("該訂單在目前分頁找不到，請檢查頁碼或篩選條件。");
                 }
             };
-            document.getElementById("dateFilter").value = "all";
-            document.getElementById("sourceFilter").value = "all";
-            document.getElementById("monthFilter").value = "all";
-            
-            if (currentRoom === "ALL") {
-                renderFilteredTable();
-                setTimeout(scrollToOrder, 200);
-            } else if (currentRoom !== bRoom) {
+
+            // 如果點擊的訂單不在當前房號下，且目前不是 ALL 模式，則切換房號
+            if (currentRoom !== "ALL" && currentRoom !== bRoom) {
                 currentRoom = bRoom;
                 await loadBookings(bRoom);
-                setTimeout(scrollToOrder, 200);
+                setTimeout(scrollToOrder, 300);
             } else {
+                // 如果已在該房號，或是在 ALL 模式下，直接執行定位
                 renderFilteredTable();
                 scrollToOrder();
             }
@@ -297,17 +318,25 @@ function openBookingForm() {
     document.getElementById("formTitle").innerText = "➕ 新增訂單";
     document.getElementById("editId").value = "";
     document.getElementById("room").value = (currentRoom === "ALL" ? "201" : currentRoom);
-    document.getElementById("guest").value = ""; document.getElementById("phone").value = "";
-    document.getElementById("checkin").value = ""; document.getElementById("checkout").value = "";
-    document.getElementById("amount").value = ""; document.getElementById("payment_status").value = "還沒繳錢";
+    document.getElementById("guest").value = ""; 
+    document.getElementById("phone").value = "";
+    document.getElementById("checkin").value = ""; 
+    document.getElementById("checkout").value = "";
+    document.getElementById("amount").value = ""; 
+    document.getElementById("deposit_amount").value = "";
+    document.getElementById("payment_status").value = "還沒繳錢";
     document.getElementById("note").value = "";
+    toggleDepositInput();
     document.getElementById("bookingForm").style.display = "block";
     document.getElementById("overlay").style.display = "block";
 }
+
 function closeForm() { document.getElementById("bookingForm").style.display = "none"; document.getElementById("overlay").style.display = "none"; }
 
 async function saveBooking() {
     const id = document.getElementById("editId").value;
+    const status = document.getElementById("payment_status").value;
+    
     const payload = {
         room: document.getElementById("room").value,
         guest_name: document.getElementById("guest").value,
@@ -315,12 +344,21 @@ async function saveBooking() {
         check_in: document.getElementById("checkin").value,
         check_out: document.getElementById("checkout").value,
         amount: document.getElementById("amount").value || null,
-        payment_status: document.getElementById("payment_status").value,
+        deposit_amount: (status === "只付訂金") ? (document.getElementById("deposit_amount").value || null) : null,
+        payment_status: status,
         note: document.getElementById("note").value
     };
-    if (id) await supabaseClient.from("bookings").update(payload).eq("id", id);
-    else { payload.source = "manual"; await supabaseClient.from("bookings").insert(payload); }
-    closeForm(); loadBookings(currentRoom); calendar.refetchEvents();
+
+    if (id) {
+        await supabaseClient.from("bookings").update(payload).eq("id", id);
+    } else {
+        payload.source = "manual"; 
+        await supabaseClient.from("bookings").insert(payload);
+    }
+    
+    closeForm(); 
+    await loadBookings(currentRoom); // 確保儲存後重新抓取
+    calendar.refetchEvents();
 }
 
 function editBooking(b) {
@@ -332,8 +370,10 @@ function editBooking(b) {
     document.getElementById("checkin").value = b.check_in;
     document.getElementById("checkout").value = b.check_out;
     document.getElementById("amount").value = b.amount || "";
+    document.getElementById("deposit_amount").value = b.deposit_amount || "";
     document.getElementById("payment_status").value = b.payment_status || "還沒繳錢";
     document.getElementById("note").value = b.note || "";
+    toggleDepositInput();
     document.getElementById("bookingForm").style.display = "block";
     document.getElementById("overlay").style.display = "block";
 }
@@ -341,7 +381,7 @@ function editBooking(b) {
 async function deleteBooking(id) {
     if (confirm("確定刪除嗎？")) { 
         await supabaseClient.from("bookings").delete().eq("id", id); 
-        loadBookings(currentRoom); 
+        await loadBookings(currentRoom); 
         calendar.refetchEvents(); 
     }
 }
