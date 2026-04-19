@@ -57,7 +57,7 @@ def sync_booking_ical(ical_url, room_name):
 
             start = safe_date(component.get("dtstart").dt)
             end = safe_date(component.get("dtend").dt)
-           summary_raw = str(component.get("summary", ""))
+            summary_raw = str(component.get("summary", ""))
             
             # 如果標題包含 CLOSED，我們就把它命名為 "Booking 訂單"
             if "CLOSED" in summary_raw.upper():
