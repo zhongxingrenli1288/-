@@ -57,15 +57,13 @@ def sync_booking_ical(ical_url, room_name):
 
             start = safe_date(component.get("dtstart").dt)
             end = safe_date(component.get("dtend").dt)
-            raw_summary = str(component.get("summary", ""))
+           summary_raw = str(component.get("summary", ""))
             
-            # 如果看到 CLOSED 或 Not available，就給它一個通用的名字
-            if "CLOSED" in raw_summary.upper() or "NOT AVAILABLE" in raw_summary.upper():
-                summary = "Booking 客人 (已預訂)"
-            elif raw_summary == "":
-                summary = "已預訂"
+            # 如果標題包含 CLOSED，我們就把它命名為 "Booking 訂單"
+            if "CLOSED" in summary_raw.upper():
+                summary = "Booking 訂單 (已預訂)"
             else:
-                summary = raw_summary # 如果有名字就用名字
+                summary = summary_raw if summary_raw else "已預訂"
 
             key_name = f"{room_name}_{start}"
             ical_events.add(key_name)
