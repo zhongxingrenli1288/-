@@ -5,15 +5,11 @@ from icalendar import Calendar
 from supabase import create_client
 from datetime import datetime
 
-# 1. 這裡的名字要跟 GitHub Secrets 裡的一模一樣
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+URL = os.environ.get("SUPABASE_URL")
+KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-# 2. 建立連線 (使用對齊後的變數名稱)
-if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
-    print("❌ 錯誤: 找不到環境變數，請檢查 GitHub Secrets")
-
-supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+# 這裡要用剛剛存好的變數名 URL 和 KEY
+supabase = create_client(URL, KEY)
 
 def safe_date(dt):
     if isinstance(dt, datetime):
