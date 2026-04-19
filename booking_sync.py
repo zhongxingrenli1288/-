@@ -5,19 +5,14 @@ from icalendar import Calendar
 from supabase import create_client
 from datetime import datetime
 
-# 1. 讀取環境變數 (請確認 GitHub Secrets 名字完全一致)
+# 1. 讀取環境變數
 URL = os.environ.get("SUPABASE_URL")
 KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-# --- 防呆檢查區 ---
 if not URL or not KEY:
-    print(f"❌ 嚴重錯誤: 找不到環境變數！")
-    print(f"目前 URL 狀態: {'已讀取' if URL else '空值'}")
-    print(f"目前 KEY 狀態: {'已讀取' if KEY else '空值'}")
-    # 這裡拋出錯誤會讓 GitHub Action 顯示紅燈，方便查看原因
-    raise ValueError("請檢查 GitHub Secrets 是否有正確設定 SUPABASE_URL 與 SUPABASE_SERVICE_ROLE_KEY")
+    raise ValueError("找不到環境變數，請檢查 GitHub Secrets 設定")
 
-# 2. 建立連線
+# 建立連線
 supabase = create_client(URL, KEY)
 
 def safe_date(dt):
@@ -27,25 +22,19 @@ def safe_date(dt):
 
 def sync_booking_ical(ical_url, room_name):
     sync_time = datetime.now().strftime("%m/%d %H:%M")
-    print(f"[{sync_time}] 開始同步: {room_name}")
+    print(f"[{sync_time}] 開始同步房型: {room_name}")
 
-    # 處理 URL 與防快取機制
-    connector = "&" if "?" in ical_url else "?"
-    final_url = f"{ical_url}{connector}details=1&t={int(time.time())}"
+    # 處理 URL
+    clean_url = ical_url.strip()
+    connector = "&" if "?" in clean_url else "?"
+    final_url = f"{clean_url}{connector}t={int(time.time())}"
     
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0'}
 
     try:
         res = requests.get(final_url, headers=headers, timeout=30)
-        
         if res.status_code != 200:
-            print(f"❌ 抓不到 iCal: {room_name} (HTTP {res.status_code})")
-            return
-
-        if "BEGIN:VCALENDAR" not in res.text:
-            print(f"⚠️ 內容無效: {room_name} (可能被阻擋)")
+            print(f"❌ 抓取失敗 HTTP {res.status_code}")
             return
 
         cal = Calendar.from_ical(res.text)
@@ -55,20 +44,24 @@ def sync_booking_ical(ical_url, room_name):
             if component.name != "VEVENT":
                 continue
 
+            # 讀取日期
             start = safe_date(component.get("dtstart").dt)
             end = safe_date(component.get("dtend").dt)
+            
+            # --- 核心邏輯：處理名字或關閉狀態 ---
             summary_raw = str(component.get("summary", ""))
             
-            # 如果標題包含 CLOSED，我們就把它命名為 "Booking 訂單"
+            # 只要看到 CLOSED 或名字，都視為訂單
             if "CLOSED" in summary_raw.upper():
                 summary = "Booking 訂單 (已預訂)"
             else:
                 summary = summary_raw if summary_raw else "已預訂"
 
-            key_name = f"{room_name}_{start}"
-            ical_events.add(key_name)
+            # 追蹤這筆訂單
+            key = f"{room_name}_{start}"
+            ical_events.add(key)
 
-            # 檢查資料庫
+            # 檢查資料庫是否有這筆
             exist = supabase.table("bookings").select("*").eq("room", room_name).eq("check_in", start).execute()
 
             payload = {
@@ -77,28 +70,18 @@ def sync_booking_ical(ical_url, room_name):
                 "check_in": start,
                 "check_out": end,
                 "source": "booking",
-                "note": f"GitHub同步 ({sync_time})"
+                "note": f"GitHub同步({sync_time})"
             }
 
             if exist.data:
                 # 已存在就更新
                 supabase.table("bookings").update(payload).eq("id", exist.data[0]["id"]).execute()
             else:
-                # 新增
-                print(f"➕ 發現新訂單: {room_name} {start} ({summary})")
+                # 不存在就新增
+                print(f"➕ 寫入新訂單: {room_name} {start} ({summary})")
                 supabase.table("bookings").insert(payload).execute()
 
-        # 3. 刪除機制：只處理 Booking 來源且是未來的訂單
-        today = datetime.now().strftime("%Y-%m-%d")
-        db_data = supabase.table("bookings").select("*").eq("room", room_name).eq("source", "booking").gte("check_in", today).execute()
-
-        for row in db_data.data:
-            db_key = f"{row['room']}_{row['check_in']}"
-            if db_key not in ical_events:
-                print(f"🗑️ 刪除取消訂單: {db_key}")
-                supabase.table("bookings").delete().eq("id", row["id"]).execute()
-
-        print(f"✅ {room_name} 同步完成")
+        print(f"✅ {room_name} 同步完成，共處理 {len(ical_events)} 筆資料")
 
     except Exception as e:
-        print(f"⚠️ {room_name} 發生錯誤: {e}")
+        print(f"⚠️ 發生錯誤: {e}")
