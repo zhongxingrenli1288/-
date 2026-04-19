@@ -6,17 +6,15 @@ from datetime import datetime
 
 # 從環境變數讀取金鑰 (GitHub Actions 設定中的 Secrets)
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
 # 2. 如果環境變數讀不到，才給預設值（或是直接報錯）
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("❌ 錯誤: 找不到 Supabase 環境變數")
-    # 下面這兩行只有在你「電腦本地」測試時才填入，上傳 GitHub 前請保持下面這樣
-    # SUPABASE_URL = SUPABASE_URL or "你的網址"
-    # SUPABASE_KEY = SUPABASE_KEY or "你的金鑰"
+   
 
 # 建立連線
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 def safe_date(dt):
     if isinstance(dt, datetime):
