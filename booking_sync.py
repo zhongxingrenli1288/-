@@ -1,14 +1,23 @@
-import os  # 確保有這行，不然會報 NameError
+import os
 import requests
 import time
 from icalendar import Calendar
 from supabase import create_client
 from datetime import datetime
 
+# 1. 讀取環境變數 (請確認 GitHub Secrets 名字完全一致)
 URL = os.environ.get("SUPABASE_URL")
 KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
-# 這裡要用剛剛存好的變數名 URL 和 KEY
+# --- 防呆檢查區 ---
+if not URL or not KEY:
+    print(f"❌ 嚴重錯誤: 找不到環境變數！")
+    print(f"目前 URL 狀態: {'已讀取' if URL else '空值'}")
+    print(f"目前 KEY 狀態: {'已讀取' if KEY else '空值'}")
+    # 這裡拋出錯誤會讓 GitHub Action 顯示紅燈，方便查看原因
+    raise ValueError("請檢查 GitHub Secrets 是否有正確設定 SUPABASE_URL 與 SUPABASE_SERVICE_ROLE_KEY")
+
+# 2. 建立連線
 supabase = create_client(URL, KEY)
 
 def safe_date(dt):
@@ -20,7 +29,7 @@ def sync_booking_ical(ical_url, room_name):
     sync_time = datetime.now().strftime("%m/%d %H:%M")
     print(f"[{sync_time}] 開始同步: {room_name}")
 
-    # 處理 URL 與偽裝
+    # 處理 URL 與防快取機制
     connector = "&" if "?" in ical_url else "?"
     final_url = f"{ical_url}{connector}details=1&t={int(time.time())}"
     
@@ -50,8 +59,8 @@ def sync_booking_ical(ical_url, room_name):
             end = safe_date(component.get("dtend").dt)
             summary = str(component.get("summary", "Booking 客人"))
 
-            key = f"{room_name}_{start}"
-            ical_events.add(key)
+            key_name = f"{room_name}_{start}"
+            ical_events.add(key_name)
 
             # 檢查資料庫
             exist = supabase.table("bookings").select("*").eq("room", room_name).eq("check_in", start).execute()
@@ -73,7 +82,7 @@ def sync_booking_ical(ical_url, room_name):
                 print(f"➕ 發現新訂單: {room_name} {start} ({summary})")
                 supabase.table("bookings").insert(payload).execute()
 
-        # 3. 刪除機制
+        # 3. 刪除機制：只處理 Booking 來源且是未來的訂單
         today = datetime.now().strftime("%Y-%m-%d")
         db_data = supabase.table("bookings").select("*").eq("room", room_name).eq("source", "booking").gte("check_in", today).execute()
 
